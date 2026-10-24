@@ -1,0 +1,295 @@
+const K='cc_v3',$=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const day=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const INDIA_CITIES=['Agra', 'Ahmedabad', 'Aurangabad', 'Amritsar', 'Bengaluru', 'Bhopal', 'Bhubaneswar', 'Chandigarh', 'Chennai', 'Coimbatore', 'Cuttack', 'Dehradun', 'Delhi', 'Dhanbad', 'Durgapur', 'Erode', 'Faridabad', 'Ghaziabad', 'Goa', 'Gurugram', 'Guwahati', 'Gwalior', 'Hubballi', 'Hyderabad', 'Imphal', 'Indore', 'Jabalpur', 'Jaipur', 'Jalandhar', 'Jamshedpur', 'Jodhpur', 'Kanpur', 'Kochi', 'Kolhapur', 'Kolkata', 'Kota', 'Kozhikode', 'Lucknow', 'Ludhiana', 'Madurai', 'Mangaluru', 'Meerut', 'Mumbai', 'Mysuru', 'Nagpur', 'Nashik', 'Navi Mumbai', 'Noida', 'Patna', 'Puducherry', 'Pune', 'Raipur', 'Rajkot', 'Ranchi', 'Salem', 'Shillong', 'Siliguri', 'Srinagar', 'Surat', 'Thane', 'Thanjavur', 'Thiruvananthapuram', 'Thrissur', 'Tiruchirappalli', 'Tirunelveli', 'Tirupati', 'Udaipur', 'Vadodara', 'Varanasi', 'Vellore', 'Vijayawada', 'Visakhapatnam', 'Warangal'];
+const CATS=['Hackathon','Workshop','Symposium','Competition','Seminar','Cultural'];
+const CI={Hackathon:['💻','Hackathons','Build, ship and win in timed team sprints.'],Workshop:['🛠️','Workshops','Hands-on learning sessions led by practitioners.'],Symposium:['🎤','Symposiums','Paper presentations, demos and expert talks.'],Competition:['🏆','Competitions','Contests, CTFs and pitch battles with prizes.'],Seminar:['📚','Seminars','Talks and knowledge sessions on trending topics.'],Cultural:['🎭','Cultural events','Fests, music, dance and inter-college culturals.']};
+const INT=['AI','Web','Data','Robotics','Design','Startups','Cybersecurity','Cloud','Music','Sports'];
+const V={1:['Research Park Auditorium','IIT Madras, Sardar Patel Rd, Adyar, Chennai, Tamil Nadu 600036'],2:['CEG Main Auditorium','Anna University, Sardar Patel Rd, Guindy, Chennai, Tamil Nadu 600025'],3:['SSN Convention Hall','SSN College of Engineering, Rajiv Gandhi Salai, Kalavakkam, Tamil Nadu 603110'],4:['Online','Google Meet link shared after registration'],5:['Design Studio, Block B','Loyola College, Nungambakkam, Chennai, Tamil Nadu 600034'],6:['Online','Discord + CTFd platform'],7:['PSG Tech Auditorium','PSG College of Technology, Avinashi Rd, Peelamedu, Coimbatore, Tamil Nadu 641004'],8:['Tech Park Seminar Hall','SRM Institute of Science and Technology, Kattankulathur, Tamil Nadu 603203'],9:['Open Air Theatre','Stella Maris College, Cathedral Rd, Chennai, Tamil Nadu 600086'],10:['Online','Zoom webinar'],11:['Club Hall (demo)','Anna University, Sardar Patel Rd, Guindy, Chennai, Tamil Nadu 600025']};
+const seed=()=>[
+ ev(1,'AI Innovation Hackathon 24h','IIT Madras','Chennai','Hackathon','Offline',0,3,1,['AI','Python','Data'],'24-hour build sprint on applied machine learning. Teams of 2–4.',1),
+ ev(2,'Web3 & Full-Stack Workshop','Anna University','Chennai','Workshop','Offline',200,6,4,['Web','JavaScript','Startups'],'Hands-on workshop building a full-stack app with a modern JS stack.',1),
+ ev(3,'National Symposium on Robotics','SSN College','Chennai','Symposium','Offline',350,12,8,['Robotics','Embedded','AI'],'Paper presentations, robot demos and industry talks.',1),
+ ev(4,'Cloud Study Jam (Online)','VIT Chennai','Chennai','Workshop','Online',0,5,2,['Cloud','DevOps'],'Free guided labs on cloud fundamentals with certificate.',1),
+ ev(5,'UI/UX Design Sprint','Loyola College','Chennai','Competition','Offline',150,9,6,['Design','Web'],'Redesign a campus app in 6 hours. Judged by industry designers.',0),
+ ev(6,'CTF Night: Capture the Flag','NIT Trichy','Trichy','Competition','Online',0,7,5,['Cybersecurity','Linux'],'Jeopardy-style CTF for beginners and intermediates.',1),
+ ev(7,'Startup Pitch Arena','PSG Tech','Coimbatore','Competition','Offline',100,15,10,['Startups','Business'],'Pitch your idea to angel investors. Prize pool ₹50,000.',1),
+ ev(8,'Data Science Bootcamp','SRM University','Chennai','Workshop','Offline',500,10,7,['Data','Python','AI'],'Two-day bootcamp: pandas, visualisation and ML basics.',0),
+ ev(9,'Inter-College Music Fest','Stella Maris','Chennai','Cultural','Offline',250,20,14,['Music'],'Battle of bands and solo acts from 30+ colleges.',1),
+ ev(10,'GenAI for Students Seminar','Anna University','Chennai','Seminar','Online',0,2,1,['AI','Data'],'Free talk on practical generative AI workflows for coursework and projects.',1),
+ ev(11,'Intra-club Robotics Meetup','Your Club (demo)','Chennai','Seminar','Offline',0,8,5,['Robotics'],'Demo event created by you. Edit or delete it in the Organizer tab.',1,1),
+ ev(12,'Hack the Campus 36h','VIT Chennai','Chennai','Hackathon','Offline',100,18,12,['Web','AI','Cloud'],'36-hour open-theme hackathon with mentors and cash prizes.',1),
+ ev(13,'Cybersecurity Symposium','NIT Trichy','Trichy','Symposium','Offline',200,22,16,['Cybersecurity','Cloud'],'Talks and live demos on modern threats and defence.',1),
+ ev(14,'AI & Robotics Hackathon','IISc Bengaluru','Bengaluru','Hackathon','Offline',0,4,2,['AI','Robotics','Python'],'36-hour hackathon on applied AI and autonomous systems with mentors from startups.',1),
+ ev(15,'Cloud & DevOps Workshop','RV College of Engineering','Bengaluru','Workshop','Offline',300,9,6,['Cloud','DevOps','Linux'],'Hands-on labs on containers, CI/CD and deploying to the cloud.',1),
+ ev(16,'Startup Weekend Hyderabad','IIIT Hyderabad','Hyderabad','Competition','Offline',200,6,3,['Startups','Business','Design'],'Form a team, build an MVP and pitch to investors in one weekend.',1),
+ ev(17,'Data Science Symposium','Osmania University','Hyderabad','Symposium','Offline',150,14,9,['Data','AI','Python'],'Research talks, poster sessions and industry panels on data science.',0),
+ ev(18,'Tech Meet Prep Camp','IIT Bombay','Mumbai','Workshop','Offline',0,11,7,['Web','AI','Data'],'Free prep camp with problem-solving sessions and mock rounds.',1),
+ ev(19,'Mumbai Cultural Fest Night','VJTI Mumbai','Mumbai','Cultural','Offline',300,18,13,['Music','Sports'],'Dance, music and theatre showcase with teams from 40+ colleges.',1),
+ ev(20,'Cybersecurity Summit Delhi','IIT Delhi','Delhi','Seminar','Offline',0,13,8,['Cybersecurity','Cloud'],'Talks and live demos on threat detection and secure development.',1),
+ ev(21,'Hack for Good 48h','Delhi Technological University','Delhi','Hackathon','Offline',100,21,15,['Web','AI','Startups'],'48-hour social-impact hackathon with cash prizes and incubation offers.',1),
+ ev(22,'Design Thinking Workshop','COEP Technological University','Pune','Workshop','Offline',250,10,6,['Design','Startups'],'Learn research, ideation and prototyping with real product designers.',0),
+ ev(23,'Kolkata Robotics Challenge','Jadavpur University','Kolkata','Competition','Offline',200,16,11,['Robotics','Embedded'],'Line-follower and robo-soccer rounds judged by faculty and industry.',1),
+ ev(24,'Full-Stack Bootcamp Kochi','CUSAT','Kochi','Workshop','Offline',400,12,8,['Web','JavaScript','Cloud'],'Two-day bootcamp building and deploying a full-stack app.',1),
+ ev(25,'Product Management Seminar','IIM Ahmedabad','Ahmedabad','Seminar','Offline',0,8,4,['Startups','Business'],'Open session on product careers with alumni from top tech firms.',1),
+ ev(26,'Python for Beginners Meetup','MNIT Jaipur','Jaipur','Workshop','Offline',0,5,3,['Python','Data'],'Free beginner-friendly session on Python and simple data projects.',1),
+ ev(27,'Inter-College Debate & Quiz','Panjab University','Chandigarh','Competition','Offline',50,9,5,['Business','Sports'],'Parliamentary debate and general quiz open to all colleges.',1),
+ ev(28,'AI for Agriculture Hack','IIIT Lucknow','Lucknow','Hackathon','Offline',0,19,14,['AI','Data','Robotics'],'Build AI tools for farmers using open datasets. Mentors on site.',0),
+ ev(29,'Open Source Contribution Day','KIIT Bhubaneswar','Bhubaneswar','Workshop','Offline',0,7,4,['Web','Linux','Cloud'],'Make your first open-source pull request with guidance from maintainers.',1),
+ ev(30,'Marine Tech Symposium','Andhra University','Visakhapatnam','Symposium','Offline',200,23,17,['Robotics','Data'],'Papers and demos on ocean data, drones and coastal engineering.',1),
+ ev(31,'Game Dev Jam','IET DAVV','Indore','Competition','Offline',100,15,10,['Design','Web'],'48-hour game jam. Solo or teams up to four.',1),
+ ev(32,'Northeast Tech Fest','IIT Guwahati','Guwahati','Symposium','Offline',250,25,19,['AI','Robotics','Cloud'],'Talks, workshops and competitions bringing colleges from across the region.',1)
+];
+V[12]=['Innovation Hub','VIT Chennai, Vandalur–Kelambakkam Rd, Chennai, Tamil Nadu 600127'];
+V[13]=['Seminar Complex','NIT Tiruchirappalli, Tanjore Main Rd, Tiruchirappalli, Tamil Nadu 620015'];
+V[14]=['Faculty Hall','Indian Institute of Science, CV Raman Rd, Bengaluru, Karnataka 560012'];
+V[15]=['Main Auditorium','RV College of Engineering, Mysore Rd, Bengaluru, Karnataka 560059'];
+V[16]=['Main Seminar Hall','IIIT Hyderabad, Gachibowli, Hyderabad, Telangana 500032'];
+V[17]=['Arts College Auditorium','Osmania University, Hyderabad, Telangana 500007'];
+V[18]=['Convention Centre','IIT Bombay, Powai, Mumbai, Maharashtra 400076'];
+V[19]=['Open Air Theatre','VJTI, H R Mahajani Rd, Matunga, Mumbai, Maharashtra 400019'];
+V[20]=['Bharti Building Hall','IIT Delhi, Hauz Khas, New Delhi, Delhi 110016'];
+V[21]=['Innovation Lab','Delhi Technological University, Shahbad Daulatpur, Main Bawana Rd, Delhi 110042'];
+V[22]=['Design Studio','COEP, Wellesley Rd, Shivajinagar, Pune, Maharashtra 411005'];
+V[23]=['Main Ground','Jadavpur University, 188 Raja S.C. Mullick Rd, Kolkata, West Bengal 700032'];
+V[24]=['Seminar Complex','CUSAT, Thrikkakara, Kochi, Kerala 682022'];
+V[25]=['Classroom Complex','IIM Ahmedabad, Vastrapur, Ahmedabad, Gujarat 380015'];
+V[26]=['CSE Seminar Room','MNIT Jaipur, JLN Marg, Malviya Nagar, Jaipur, Rajasthan 302017'];
+V[27]=['Students Centre','Panjab University, Sector 14, Chandigarh 160014'];
+V[28]=['Lecture Hall Complex','IIIT Lucknow, Chak Ganjaria, Lucknow, Uttar Pradesh 226002'];
+V[29]=['KIIT Auditorium','KIIT University, Patia, Bhubaneswar, Odisha 751024'];
+V[30]=['Convocation Hall','Andhra University, Waltair Uplands, Visakhapatnam, Andhra Pradesh 530003'];
+V[31]=['Computer Centre','IET DAVV, Khandwa Rd, Indore, Madhya Pradesh 452017'];
+V[32]=['Lecture Hall Complex','IIT Guwahati, Amingaon, North Guwahati, Assam 781039'];
+function ev(id,title,college,city,cat,mode,price,d,dl,tags,desc,verified,mine){const v=V[id]||['',''];return{id,title,college,city,cat,mode,price,date:day(d),deadline:day(dl),tags,desc,verified:!!verified,mine:!!mine,venue:v[0],addr:v[1],link:'https://example.com/register/'+id,orgName:college+' Events Cell',phone:'+91 90000 '+String(id).padStart(5,'0'),email:'events'+id+'@example.com'}}
+let S=load();
+function load(){try{const r=JSON.parse(localStorage.getItem(K));if(r&&r.events)return r}catch(e){}return fresh()}
+function fresh(){return{events:seed(),profile:{interests:['AI','Web'],skills:'Python, JavaScript',budget:300,city:'Chennai'},saved:[],regs:[],nextId:100}}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+const F0=()=>({q:'',mode:'',city:'',maxp:'',from:''});
+let P={t:'home',cat:null,id:null},F=F0(),editing=null;
+const go=(t,x={})=>{P={t,cat:null,id:null,...x};F=F0();view();window.scrollTo(0,0)};
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)};
+const dleft=d=>Math.round((new Date(d)-new Date(day(0)))/864e5);
+const fmt=d=>new Date(d+'T00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const fmtS=d=>new Date(d+'T00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+const price=p=>p?'₹'+p:'Free';
+function dlLabel(e){const n=dleft(e.deadline);return n<0?'<span class="dl x">Registration closed</span>':n===0?'<span class="dl u">⏰ Closes today</span>':`<span class="dl ${n<=3?'u':''}">${n<=3?'🔥 ':'⏳ '}Closes in ${n} day${n>1?'s':''} (${fmtS(e.deadline)})</span>`}
+const mapQ=e=>encodeURIComponent([e.venue,e.addr||e.college+', '+e.city].filter(Boolean).join(', '));
+const mapsUrl=e=>'https://www.google.com/maps/search/?api=1&query='+mapQ(e);
+const dirUrl=e=>'https://www.google.com/maps/dir/?api=1&destination='+mapQ(e);
+
+/* simple natural-language search inside a page */
+function parseNL(q){
+  const f={words:[],chips:[]};let rest=q.toLowerCase();
+  const take=(re,fn)=>{const m=rest.match(re);if(m){fn(m);rest=rest.replace(re,' ')}};
+  take(/\bfree\b/,()=>{f.free=1;f.chips.push('Free')});
+  take(/\bonline\b/,()=>{f.mode='Online';f.chips.push('Online')});
+  take(/\b(offline|in[- ]person)\b/,()=>{f.mode='Offline';f.chips.push('Offline')});
+  take(/\b(?:near|in|at)\s+([a-z]+)/,m=>{f.city=m[1];f.chips.push('Near '+m[1][0].toUpperCase()+m[1].slice(1))});
+  CATS.forEach(c=>take(new RegExp('\\b'+c.toLowerCase()+'s?\\b'),()=>{f.cat=c;f.chips.push(c)}));
+  f.words=rest.split(/\s+/).filter(w=>w.length>1&&!['the','a','an','for','and','events','event','me','show','find'].includes(w));
+  return f}
+function filtered(base){
+  const n=parseNL(F.q);
+  const list=base.filter(e=>{
+    const hay=(e.title+' '+e.college+' '+e.city+' '+e.tags.join(' ')+' '+e.desc+' '+e.cat+' '+e.venue).toLowerCase();
+    if(n.free&&e.price>0)return false;if(n.mode&&e.mode!==n.mode)return false;
+    if(n.cat&&e.cat!==n.cat)return false;if(n.city&&!(e.city+' '+e.college).toLowerCase().includes(n.city)&&e.mode!=='Online')return false;
+    if(!n.words.every(w=>hay.includes(w)))return false;
+    if(F.mode&&e.mode!==F.mode)return false;if(F.city&&!e.city.toLowerCase().includes(F.city.trim().toLowerCase()))return false;
+    if(F.maxp!==''&&e.price>+F.maxp)return false;if(F.from&&e.date<F.from)return false;
+    return true});
+  return{list:list.sort((a,b)=>a.date.localeCompare(b.date)),chips:n.chips}}
+
+function score(e){
+  const p=S.profile,why=[];let s=0;
+  const mt=e.tags.filter(t=>p.interests.some(i=>i.toLowerCase()===t.toLowerCase()));
+  if(mt.length){const v=Math.min(50,mt.length*25);s+=v;why.push(`Matches your interest in ${mt.join(', ')} (+${v})`)}
+  const sk=p.skills.toLowerCase().split(/[, ]+/).filter(Boolean);const ms=e.tags.filter(t=>sk.includes(t.toLowerCase())&&!mt.includes(t));
+  if(ms.length){s+=15;why.push(`Fits your skills: ${ms.join(', ')} (+15)`)}
+  if(e.price<=p.budget){const v=e.price===0?15:10;s+=v;why.push(e.price===0?'Free to attend (+15)':`Within your ₹${p.budget} budget (+10)`)}else why.push(`Above your ₹${p.budget} budget (+0)`);
+  if(e.mode==='Online'||e.city===p.city){s+=15;why.push(e.mode==='Online'?'Online, so you can join from anywhere (+15)':`Held in ${e.city} (+15)`)}
+  const n=dleft(e.deadline);if(n>=0&&n<=7){s+=5;why.push('⏳ Registration closing soon (+5)')}
+  if(e.verified){s+=5;why.push('Verified listing (+5)')}
+  return{s:Math.min(100,s),why}}
+
+function card(e,opt={}){
+  const sv=S.saved.includes(e.id),rg=S.regs.includes(e.id),open=dleft(e.deadline)>=0,r=opt.rec?score(e):null;
+  return`<article class="card">
+  <div class="row"><span class="chip">${CI[e.cat]?CI[e.cat][0]+' ':''}${esc(e.cat)}</span><span class="chip t">${e.mode}</span><span class="sp"></span>${r?`<span class="score" title="Match score">${r.s}%</span>`:''}</div>
+  <h3>${esc(e.title)}</h3>
+  <div class="meta">${esc(e.college)} · ${esc(e.city)}<br>${fmtS(e.date)} · ${price(e.price)}</div>
+  <div class="pin">${e.mode==='Online'?'💻 Online event':'📍 '+esc(e.venue||e.college)}</div>
+  <div class="row">${e.verified?'<span class="ver">✔ Verified by admin</span>':'<span class="unv">Pending review</span>'}</div>
+  <div>${esc(e.desc)}</div>
+  <div class="row">${e.tags.map(t=>`<span class="chip t">${esc(t)}</span>`).join('')}</div>
+  ${r?`<div class="why"><b>Why this event?</b><br>${r.why.map(esc).join('<br>')}</div>`:''}
+  <div>${dlLabel(e)}</div>
+  <div class="row">
+    <button class="btn s" data-a="open" data-id="${e.id}">View details &amp; location</button>
+    <button class="btn s g" data-a="save" data-id="${e.id}">${sv?'★ Saved':'☆ Save'}</button>
+    <button class="btn s ${rg?'':'g'} ${rg?'g':''}" data-a="reg" data-id="${e.id}" ${!open&&!rg?'disabled':''}>${rg?'Registered ✓':'Register'}</button>
+  </div></article>`}
+
+function filterBar(base,ph){
+  const {list,chips}=filtered(base),cities=[...new Set([...S.events.map(e=>e.city),...INDIA_CITIES])].sort();
+  return{list,html:`<input id="q" type="search" placeholder='${ph}' value="${esc(F.q)}" aria-label="Search events" style="margin-bottom:10px">
+  <div id="chipbox">${chipsHtml(chips)}</div>
+  <div class="filters">
+    <div><label class="l">Mode</label><select data-f="mode"><option value="">Any</option><option ${F.mode==='Online'?'selected':''}>Online</option><option ${F.mode==='Offline'?'selected':''}>Offline</option></select></div>
+    <div class="cbox"><label class="l">City (type to search)</label><input data-f="city" id="cityin" role="combobox" aria-expanded="false" aria-controls="citylist" placeholder="e.g. Bengaluru" autocomplete="off" value="${esc(F.city)}"><div id="citylist" class="clist" role="listbox" hidden></div></div>
+    <div><label class="l">Max fee (₹)</label><input data-f="maxp" type="number" min="0" placeholder="Any" value="${F.maxp}"></div>
+    <div><label class="l">On or after</label><input data-f="from" type="date" value="${F.from}"></div>
+    <div style="align-self:end"><button class="btn g" data-a="clear" style="width:100%">Clear filters</button></div>
+  </div><p class="note" id="cnt">${list.length} event${list.length!==1?'s':''} found</p>`}}
+const chipsHtml=chips=>chips.length?`<div class="chips">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}<span class="note">understood from your search</span></div>`:'';
+const catGridHtml=(c,list)=>list.map(e=>card(e)).join('')||`<div class="empty">${F.city?`No ${CI[c][1].toLowerCase()} found in “${esc(F.city)}” yet. Try another city or clear the filter.`:`No ${CI[c][1].toLowerCase()} match. Try removing a filter.`}</div>`;
+const allCities=()=>[...new Set([...S.events.map(e=>e.city),...INDIA_CITIES])].sort();
+function showCities(){const inp=$('#cityin'),box=$('#citylist');if(!inp)return;const q=inp.value.trim().toLowerCase(),cat=P.cat;
+  const cnt=c=>S.events.filter(e=>e.city===c&&e.cat===cat).length;
+  const L=allCities().filter(c=>c.toLowerCase().includes(q)).map(c=>({c,n:cnt(c)})).sort((a,b)=>(!!b.n-!!a.n)||(b.c.toLowerCase().startsWith(q)-a.c.toLowerCase().startsWith(q))||a.c.localeCompare(b.c));
+  const top=L.slice(0,8);
+  box.innerHTML=top.map(x=>`<button type="button" role="option" class="${x.n?'':'z'}" data-pick="${esc(x.c)}"><span>${esc(x.c)}</span><i>${x.n?x.n+(x.n>1?' events':' event'):'no events'}</i></button>`).join('')+(L.length>8?`<div class="hint">${L.length-8} more. Keep typing to narrow down.</div>`:'')||'<div class="hint">No matching city. Your text is still used to search.</div>';
+  box.hidden=false;inp.setAttribute('aria-expanded','true')}
+function hideCities(){const b=$('#citylist');if(b)b.hidden=true;const i=$('#cityin');if(i)i.setAttribute('aria-expanded','false')}
+function updateRes(){if(P.t!=='cat')return;const c=P.cat,{list,chips}=filtered(S.events.filter(e=>e.cat===c));
+  $('#chipbox').innerHTML=chipsHtml(chips);$('#cnt').textContent=list.length+' event'+(list.length!==1?'s':'')+' found';$('#grid').innerHTML=catGridHtml(c,list)}
+function bindSearch(){
+  const q=$('#q'),ci=$('#cityin');
+  if(q)q.addEventListener('input',()=>{F.q=q.value;updateRes()});
+  if(ci){ci.addEventListener('focus',showCities);ci.addEventListener('click',showCities);
+    ci.addEventListener('input',()=>{F.city=ci.value;showCities();updateRes()});
+    ci.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Enter'){e.preventDefault();hideCities()}})}}
+document.addEventListener('mousedown',e=>{if(!e.target.closest('.cbox'))hideCities()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;F.city=b.dataset.pick;$('#cityin').value=F.city;hideCities();updateRes()});
+
+const TABS=[['home','Home'],...CATS.map(c=>['cat:'+c,CI[c][1]]),'|',['foryou','For you'],['saved','Saved'],['regs','Registrations'],['org','Organizer']];
+function nav(){
+  const cur=P.t==='cat'?'cat:'+P.cat:P.t==='event'?'cat:'+S.events.find(e=>e.id===P.id)?.cat:P.t;
+  $('#nav').innerHTML=TABS.map(t=>{if(t==='|')return'<i></i>';const[k,n]=t;const cnt=k==='saved'?' ('+S.saved.length+')':k==='regs'?' ('+S.regs.length+')':'';return`<button class="${k===cur?'on':''}" data-tab="${k}">${n}${cnt}</button>`}).join('')}
+
+function view(){
+  nav();const a=$('#app');
+  if(P.t==='home'){
+    const up=S.events.filter(e=>dleft(e.deadline)>=0).sort((a,b)=>a.deadline.localeCompare(b.deadline)).slice(0,6);
+    a.innerHTML=`<div class="hero"><h2 style="margin:0">Pick a category to explore</h2><p>Every category has its own page. Open any event to see where it is on Google Maps.</p></div>
+    <div class="cats">${CATS.map(c=>`<button class="ct" data-tab="cat:${c}"><span>${CI[c][0]}</span><b>${CI[c][1]}</b><small>${S.events.filter(e=>e.cat===c).length} listed</small></button>`).join('')}</div>
+    <h2>🔥 Closing soon</h2><div class="grid">${up.map(e=>card(e)).join('')}</div>`;
+  }
+  if(P.t==='cat'){
+    const c=P.cat,base=S.events.filter(e=>e.cat===c),fb=filterBar(base,`Search ${CI[c][1].toLowerCase()}, e.g. "free ${c.toLowerCase()} near Chennai"`);
+    a.innerHTML=`<button class="back" data-go="home">← All categories</button><h2>${CI[c][0]} ${CI[c][1]}</h2><p class="note" style="margin-top:-4px;font-size:14px">${CI[c][2]}</p>${fb.html}
+    <div class="grid" id="grid">${catGridHtml(c,fb.list)}</div>`;bindSearch();
+  }
+  if(P.t==='event'){
+    const e=S.events.find(x=>x.id===P.id);if(!e){go('home');return}
+    const sv=S.saved.includes(e.id),rg=S.regs.includes(e.id),open=dleft(e.deadline)>=0,on=e.mode==='Online';
+    const more=S.events.filter(x=>x.cat===e.cat&&x.id!==e.id).slice(0,3);
+    a.innerHTML=`<button class="back" data-tab="cat:${e.cat}">← Back to ${CI[e.cat]?CI[e.cat][1]:e.cat}</button>
+    <div class="panel"><div class="evbrand"><svg class="lg" width="30" height="30" aria-hidden="true"><use href="#logo"/></svg><b>CampusConnect AI</b><span class="note">Event details</span></div><div class="row"><span class="chip">${esc(e.cat)}</span><span class="chip t">${e.mode}</span>${e.verified?'<span class="ver">✔ Verified by admin</span>':'<span class="unv">Pending review</span>'}</div>
+    <h2 style="font-size:28px;margin-top:8px">${esc(e.title)}</h2><div class="meta">Hosted by ${esc(e.college)}, ${esc(e.city)}</div>
+    <p>${esc(e.desc)}</p><div class="row">${e.tags.map(t=>`<span class="chip t">${esc(t)}</span>`).join('')}</div>
+    <div class="info"><div><small>Event date</small><b>${fmt(e.date)}</b></div><div><small>Registration deadline</small><b>${fmt(e.deadline)}</b></div><div><small>Fee</small><b>${price(e.price)}</b></div><div><small>Mode</small><b>${e.mode}</b></div></div>
+    <div>${dlLabel(e)}</div>
+    <div class="row" style="margin-top:10px"><button class="btn ${rg?'g':''}" data-a="reg" data-id="${e.id}" ${!open&&!rg?'disabled':''}>${rg?'Registered ✓':'Register'}</button><button class="btn g" data-a="save" data-id="${e.id}">${sv?'★ Saved':'☆ Save'}</button><button class="btn g" data-a="share" data-id="${e.id}">Share</button></div></div>
+    <div class="panel loc"><h2>${on?'💻 How to join':'📍 Event location'}</h2>
+    ${on?`<p class="pin">This is an online event.</p><p>${esc(e.addr||'Joining details will be shared by the organizer after registration.')}</p><a class="btn" href="${esc(e.link)}" target="_blank" rel="noopener">Open registration link</a>`
+    :`<p class="pin" style="margin:0">${esc(e.venue||e.college)}</p><p style="margin:2px 0 12px">${esc(e.addr||e.college+', '+e.city)}</p>
+    <div class="row"><a class="btn" href="${mapsUrl(e)}" target="_blank" rel="noopener">🗺️ View on Google Maps</a><a class="btn g" href="${dirUrl(e)}" target="_blank" rel="noopener">🧭 Get directions</a><button class="btn g" data-a="copyaddr" data-id="${e.id}">Copy address</button></div>
+    <p class="note" style="margin-bottom:0">“Get directions” starts from your current location in Google Maps.</p>
+    <iframe class="map" title="Map of ${esc(e.venue||e.college)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=${mapQ(e)}&amp;output=embed"></iframe>`}</div>
+    <div class="panel"><h2>📞 Organizer contact</h2><p class="pin" style="margin:0">${esc(e.orgName||e.college)}</p>
+    ${e.phone?`<p style="margin:4px 0">Phone: <b>${esc(e.phone)}</b></p>`:'<p class="note">No phone number provided.</p>'}${e.email?`<p style="margin:4px 0 12px">Email: <b>${esc(e.email)}</b></p>`:''}
+    <div class="row">${e.phone?`<a class="btn" href="tel:${esc(e.phone.replace(/[^+\d]/g,''))}">📞 Call organizer</a>`:''}${e.email?`<a class="btn g" href="mailto:${esc(e.email)}">✉️ Email</a>`:''}<a class="btn g" href="${esc(e.link)}" target="_blank" rel="noopener">Registration page</a></div><p class="note" style="margin-bottom:0">Sample events show demo contact details.</p></div>
+    ${more.length?`<h2>More ${CI[e.cat]?CI[e.cat][1].toLowerCase():''}</h2><div class="grid">${more.map(x=>card(x)).join('')}</div>`:''}`;
+  }
+  if(P.t==='foryou'){
+    const p=S.profile,ranked=S.events.filter(e=>dleft(e.deadline)>=0).map(e=>({e,r:score(e)})).sort((a,b)=>b.r.s-a.r.s);
+    a.innerHTML=`<div class="panel"><h2>Your preferences</h2>
+    <label class="l">Interests</label><div class="chips">${INT.map(i=>`<span class="chip t ${p.interests.includes(i)?'on':''}" data-a="int" data-v="${i}" role="button" tabindex="0" style="cursor:pointer">${i}</span>`).join('')}</div>
+    <div class="f2" style="margin-top:8px">
+      <div><label class="l">Skills (comma separated)</label><input data-p="skills" value="${esc(p.skills)}"></div>
+      <div><label class="l">Budget per event (₹)</label><input data-p="budget" type="number" min="0" value="${p.budget}"></div>
+      <div><label class="l">Preferred city</label><input data-p="city" value="${esc(p.city)}"></div>
+      <div><label class="l">Your college</label><input data-p="college" value="${esc(p.college||'')}" placeholder="e.g. Anna University"></div>
+    </div>
+    <p class="note">Scores use a transparent rule-based formula: interests (up to 50), skills (15), budget (up to 15), location or online (15), deadline urgency (5), verified (5).</p></div>
+    <div class="grid">${ranked.map(x=>card(x.e,{rec:1})).join('')}</div>`;
+  }
+  if(P.t==='saved'){
+    const L=S.events.filter(e=>S.saved.includes(e.id)).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+    a.innerHTML=`<h2>Deadline tracker</h2><p class="note">Saved events sorted by registration deadline.</p>
+    <div class="tl">${L.map(e=>{const n=dleft(e.deadline),rg=S.regs.includes(e.id);return`<div class="tli"><div class="days">${n<0?'–':n}<small>${n<0?'closed':'days left'}</small></div><div style="flex:1;min-width:180px"><b>${esc(e.title)}</b><div class="meta">${esc(e.college)} · Deadline ${fmtS(e.deadline)} · Event ${fmtS(e.date)}</div></div>
+    <button class="btn s g" data-a="open" data-id="${e.id}">Details</button><button class="btn s ${rg?'g':''}" data-a="reg" data-id="${e.id}" ${n<0&&!rg?'disabled':''}>${rg?'Registered ✓':'Register'}</button><button class="btn s d" data-a="save" data-id="${e.id}">Remove</button></div>`}).join('')||'<div class="empty">Nothing saved yet. Tap “Save” on any event to track its deadline.</div>'}</div>`;
+  }
+  if(P.t==='regs'){
+    const L=S.events.filter(e=>S.regs.includes(e.id)).sort((a,b)=>a.date.localeCompare(b.date));
+    a.innerHTML=`<h2>My registrations</h2><p class="note">Demo registrations stay inside this prototype. Open an event to see its location.</p>
+    <div class="grid">${L.map(e=>card(e)).join('')||'<div class="empty">You haven’t registered for any event yet.</div>'}</div>`;
+  }
+  if(P.t==='org'){
+    const mine=S.events.filter(e=>e.mine),x=editing?S.events.find(e=>e.id===editing):null,v=(k,d='')=>esc(x?x[k]:d);
+    a.innerHTML=`<div class="panel"><h2>${x?'Edit event':'Create an event'}</h2>
+    <div class="f2">
+      <div><label class="l">Title</label><input id="o_title" value="${v('title')}"></div>
+      <div><label class="l">College / club</label><input id="o_college" value="${v('college',S.profile.college||'')}"></div>
+      <div><label class="l">City</label><input id="o_city" value="${v('city',S.profile.city)}"></div>
+      <div><label class="l">Category</label><select id="o_cat">${CATS.map(c=>`<option ${x&&x.cat===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div><label class="l">Mode</label><select id="o_mode"><option ${x&&x.mode==='Offline'?'selected':''}>Offline</option><option ${x&&x.mode==='Online'?'selected':''}>Online</option></select></div>
+      <div><label class="l">Venue name (offline)</label><input id="o_venue" value="${v('venue')}" placeholder="e.g. Main Auditorium"></div>
+      <div><label class="l">Full address (used for Google Maps)</label><input id="o_addr" value="${v('addr')}" placeholder="Street, area, city, PIN"></div>
+      <div><label class="l">Fee (₹, 0 = free)</label><input id="o_price" type="number" min="0" value="${v('price',0)}"></div>
+      <div><label class="l">Event date</label><input id="o_date" type="date" value="${v('date',day(7))}"></div>
+      <div><label class="l">Registration deadline</label><input id="o_dl" type="date" value="${v('deadline',day(5))}"></div>
+      <div><label class="l">Tags (comma separated)</label><input id="o_tags" value="${x?esc(x.tags.join(', ')):''}" placeholder="AI, Python"></div>
+      <div><label class="l">Registration link</label><input id="o_link" value="${v('link','https://')}"></div>
+      <div><label class="l">Organizer name</label><input id="o_org" value="${v('orgName')}"></div>
+      <div><label class="l">Organizer phone</label><input id="o_phone" type="tel" value="${v('phone')}" placeholder="+91 98765 43210"></div>
+      <div><label class="l">Organizer email</label><input id="o_email" type="email" value="${v('email')}"></div>
+    </div>
+    <label class="l" style="margin-top:8px">Description</label><textarea id="o_desc" rows="2">${v('desc')}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn" data-a="osave">${x?'Save changes':'Publish event'}</button>${x?'<button class="btn g" data-a="ocancel">Cancel</button>':''}<span class="note" id="o_err" style="color:var(--ac)"></span></div></div>
+    <h2>Your listings</h2>
+    <div class="tl">${mine.map(e=>`<div class="tli"><div style="flex:1;min-width:180px"><b>${esc(e.title)}</b><div class="meta">${esc(e.cat)} · ${fmtS(e.date)} · ${price(e.price)} · ${e.verified?'Verified':'Pending review'}</div></div>
+    <div class="meta">👁 ${e.views||0} views · ☆ ${e.saves||0} saves · ✓ ${e.regCount||0} registrations</div>
+    <button class="btn s g" data-a="oedit" data-id="${e.id}">Edit</button><button class="btn s d" data-a="odel" data-id="${e.id}">Delete</button></div>`).join('')||'<div class="empty">No listings yet. Create your first event above.</div>'}</div>`;
+  }
+}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab],[data-a],[data-go]');if(!t)return;
+  if(t.dataset.go){go(t.dataset.go);return}
+  if(t.dataset.tab){const k=t.dataset.tab;k.startsWith('cat:')?go('cat',{cat:k.slice(4)}):go(k);return}
+  const a=t.dataset.a,id=+t.dataset.id,E=S.events.find(x=>x.id===id);
+  if(a==='open'){E.views=(E.views||0)+1;save();go('event',{id});if(E.mode==='Offline')toast('📍 '+(E.venue||E.college)+', '+E.city);return}
+  if(a==='save'){const i=S.saved.indexOf(id);if(i>-1){S.saved.splice(i,1);toast('Removed from saved')}else{S.saved.push(id);E.saves=(E.saves||0)+1;toast('Saved. Deadline added to tracker')}}
+  if(a==='reg'){if(S.regs.includes(id)){S.regs=S.regs.filter(x=>x!==id);E.regCount=Math.max(0,(E.regCount||1)-1);toast('Registration cancelled')}else{S.regs.push(id);E.regCount=(E.regCount||0)+1;toast('Registered (demo). Real events use the organizer link')}}
+  if(a==='share'){const txt=`${E.title} – ${E.college}, ${fmt(E.date)} (${price(E.price)}). ${E.mode==='Offline'?'Location: '+mapsUrl(E)+' ':''}Register by ${fmt(E.deadline)}: ${E.link}`;
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Event details copied')).catch(()=>{window.prompt('Copy event details:',txt)})}
+  if(a==='copyaddr'){const txt=(E.venue?E.venue+', ':'')+(E.addr||E.college+', '+E.city);(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Address copied')).catch(()=>{window.prompt('Copy address:',txt)});return}
+  if(a==='clear'){F=F0()}
+  if(a==='int'){const l=S.profile.interests,i=l.indexOf(t.dataset.v);i>-1?l.splice(i,1):l.push(t.dataset.v)}
+  if(a==='oedit'){editing=id;window.scrollTo(0,0)}
+  if(a==='ocancel'){editing=null}
+  if(a==='odel'){if(confirm('Delete this event?')){S.events=S.events.filter(x=>x.id!==id);S.saved=S.saved.filter(x=>x!==id);S.regs=S.regs.filter(x=>x!==id);toast('Event deleted')}else return}
+  if(a==='osave'){
+    const g=i=>$('#'+i).value.trim();
+    if(!g('o_title')||!g('o_college')){$('#o_err').textContent='Add a title and college.';return}
+    if(g('o_mode')==='Offline'&&!g('o_addr')&&!g('o_venue')){$('#o_err').textContent='Add a venue or address so students can find it on Google Maps.';return}
+    if(g('o_dl')>g('o_date')){$('#o_err').textContent='The deadline must be on or before the event date.';return}
+    const d={title:g('o_title'),college:g('o_college'),city:g('o_city'),cat:g('o_cat'),mode:g('o_mode'),venue:g('o_venue'),addr:g('o_addr'),price:+g('o_price')||0,date:g('o_date'),deadline:g('o_dl'),tags:g('o_tags').split(',').map(s=>s.trim()).filter(Boolean),desc:g('o_desc'),link:g('o_link'),orgName:g('o_org'),phone:g('o_phone'),email:g('o_email')};
+    if(editing){Object.assign(S.events.find(x=>x.id===editing),d);toast('Changes saved');editing=null}
+    else{S.events.push({id:S.nextId++,verified:false,mine:true,...d});toast('Published. Pending admin review')}
+  }
+  save();view();
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.f&&t.id!=='cityin'){F[t.dataset.f]=t.value;view()}
+  if(t.dataset.p){S.profile[t.dataset.p]=t.dataset.p==='budget'?(+t.value||0):t.value;save();view()}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.chip[role=button]')){e.preventDefault();e.target.click()}});
+$('#reset').onclick=()=>{if(confirm('Reset all demo data?')){S=fresh();save();F=F0();editing=null;go('home');toast('Demo data reset')}};
+$('#theme').onclick=()=>{const r=document.documentElement,dk=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dk?'light':'dark'};
+view();
