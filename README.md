@@ -79,4 +79,5 @@ The ranking is rule-based and explainable, so every event card shows *why* it wa
 
 ## Team
 
-Add your team name and members here.
+Team Name: Magic Moments
+Team Members: G Soorya Parkash, V A Moneshwaran , S Mozhiyarasu
